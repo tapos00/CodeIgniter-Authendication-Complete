@@ -48,6 +48,9 @@ class Auth_public extends CI_Controller {
 		
 		// Define a global variable to store data that is then used by the end view page.
 		$this->data = null;
+		if ($this->flexi_auth->is_logged_in()) {
+			$this->data['infoResult'] = $this->flexi_auth->get_user_by_id()->row();
+		}
 	}
 
 	###++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++###	
@@ -113,9 +116,14 @@ class Auth_public extends CI_Controller {
 		$this->data['user'] = $this->flexi_auth->get_user_by_identity_row_array();
 
 		// Set any returned status/error messages.
-		$this->data['message'] = (! isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];		
+		$this->data['message'] = (! isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
 
-		$this->load->view('demo/public_examples/account_update_view', $this->data);
+		$this->data['title'] = 'update profile';
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
+		$this->data['container'] = 'auth/admin/account_update_view';
+		$this->load->view('main_page', $this->data);
+
+
 	}
 
  	/**
@@ -135,8 +143,10 @@ class Auth_public extends CI_Controller {
 				
 		// Set any returned status/error messages.
 		$this->data['message'] = (! isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
-		
-		$this->load->view('demo/public_examples/password_update_view', $this->data);
+
+		$this->data['title'] = 'change password';
+		$this->data['container'] = 'auth/admin/password_update_view';
+		$this->load->view('main_page', $this->data);
 	}
 
  	/**

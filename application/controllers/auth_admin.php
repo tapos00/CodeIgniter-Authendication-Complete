@@ -29,7 +29,7 @@ class Auth_admin extends CI_Controller {
 		$this->auth = new stdClass;
 
 		// Load 'standard' flexi auth library by default.
-		$this->load->library('flexi_auth');	
+		$this->load->library('flexi_auth');
 
 		// Check user is logged in as an admin.
 		// For security, admin users should always sign in via Password rather than 'Remember me'.
@@ -48,6 +48,9 @@ class Auth_admin extends CI_Controller {
 		
 		// Define a global variable to store data that is then used by the end view page.
 		$this->data = null;
+		if ($this->flexi_auth->is_logged_in()) {
+			$this->data['infoResult'] = $this->flexi_auth->get_user_by_id()->row();
+		}
 	}
 
 	###++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++###	
@@ -145,9 +148,13 @@ class Auth_admin extends CI_Controller {
 		$this->demo_auth_admin_model->get_user_accounts();
 		
 		// Set any returned status/error messages.
-		$this->data['message'] = (! isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];		
+		$this->data['message'] = (! isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
 
-		$this->load->view('demo/admin_examples/user_acccounts_view', $this->data);		
+		$this->data['title'] = 'new user Registation';
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
+		$this->data['container'] = 'auth/admin/user_acccounts_view';
+		$this->load->view('main_page', $this->data);
+
     }
 	
  	/**
@@ -194,6 +201,7 @@ class Auth_admin extends CI_Controller {
  	 */
     function manage_user_groups()
     {
+
 		// Check user has privileges to view user groups, else display a message to notify the user they do not have valid privileges.
 		if (! $this->flexi_auth->is_privileged('View User Groups'))
 		{
@@ -220,9 +228,12 @@ class Auth_admin extends CI_Controller {
 		$this->data['user_groups'] = $this->flexi_auth->get_groups_array($sql_select);
 				
 		// Set any returned status/error messages.
-		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];		
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
 
-		$this->load->view('demo/admin_examples/user_groups_view', $this->data);		
+		$this->data['title'] = 'manage user groups';
+		$this->data['container'] = 'auth/admin/user_groups_view';
+		$this->load->view('main_page', $this->data);
+
     }
 	
  	/**
@@ -246,9 +257,11 @@ class Auth_admin extends CI_Controller {
 		}
 		
 		// Set any returned status/error messages.
-		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];		
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
 
-		$this->load->view('demo/admin_examples/user_group_insert_view', $this->data);
+		$this->data['title'] = 'new group insert';
+		$this->data['container'] = 'auth/admin/user_group_insert_view';
+		$this->load->view('main_page', $this->data);
 	}
 	
  	/**
@@ -317,9 +330,12 @@ class Auth_admin extends CI_Controller {
 		$this->data['privileges'] = $this->flexi_auth->get_privileges_array($sql_select);
 				
 		// Set any returned status/error messages.
-		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];		
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
 
-		$this->load->view('demo/admin_examples/privileges_view', $this->data);
+		$this->data['title'] = 'previledge view';
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
+		$this->data['container'] = 'auth/admin/privileges_view';
+		$this->load->view('main_page', $this->data);
 	}
 	
  	/**
@@ -343,9 +359,13 @@ class Auth_admin extends CI_Controller {
 		}
 		
 		// Set any returned status/error messages.
-		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];		
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
 
-		$this->load->view('demo/admin_examples/privilege_insert_view', $this->data);
+		$this->data['title'] = 'previlege insert';
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
+		$this->data['container'] = 'auth/admin/privilege_insert_view';
+		$this->load->view('main_page', $this->data);
+
 	}
 	
  	/**
@@ -451,10 +471,6 @@ class Auth_admin extends CI_Controller {
 		$this->load->view('demo/admin_examples/user_privileges_update_view', $this->data);		
     }
     
- 	/**
- 	 * update_group_privileges 
- 	 * Update the access privileges of a specific user group.
- 	 */
     function update_group_privileges($group_id)
     {
 		// Check user has privileges to update group privileges, else display a message to notify the user they do not have valid privileges.
@@ -548,8 +564,11 @@ class Auth_admin extends CI_Controller {
 			$sql_where[$this->flexi_auth->db_column('user_group', 'id').' !='] = 2;
 		}
 		$this->data['users'] = $this->flexi_auth->get_users_array($sql_select, $sql_where);
-			
-		$this->load->view('demo/admin_examples/users_view', $this->data);
+
+		$this->data['title'] = 'active user';
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
+		$this->data['container'] = 'auth/admin/users_view';
+		$this->load->view('main_page', $this->data);
 	}
 
  	/**
@@ -631,8 +650,10 @@ class Auth_admin extends CI_Controller {
 			$sql_where[$this->flexi_auth->db_column('user_group', 'id').' !='] = 2;
 		}
 		$this->data['users'] = $this->flexi_auth->get_users_array($sql_select, $sql_where);
-		
-		$this->load->view('demo/admin_examples/users_view', $this->data);
+		$this->data['title'] = 'new user Registation';
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
+		$this->data['container'] = 'auth/admin/users_view';
+		$this->load->view('main_page', $this->data);
 	}
 
 }

@@ -38,13 +38,8 @@ class Auth extends CI_Controller {
 			if ($this->session->flashdata('message')) { $this->session->keep_flashdata('message'); }
 			
 			// Redirect logged in admins (For security, admin users should always sign in via Password rather than 'Remember me'.
-			if ($this->flexi_auth->is_admin()) 
-			{
-				redirect('auth_admin/dashboard');
-			}
-			else
-			{
-				redirect('auth_public/dashboard');
+			if ($this->flexi_auth->is_logged_in()) {
+				redirect('dashboard');
 			}
 		}
 		
@@ -93,7 +88,8 @@ class Auth extends CI_Controller {
 	 * Note: This page is only accessible to users who are not currently logged in, else they will be redirected.
 	 */ 
     function login()
-    {	
+    {
+
 		// If 'Login' form has been submited, attempt to log the user in.
 		if ($this->input->post('login_user'))
 		{
@@ -119,7 +115,7 @@ class Auth extends CI_Controller {
 			 * 
 			 * Note: To use this example, you will also need to enable the recaptcha examples in 'models/demo_auth_model.php', and 'views/demo/login_view.php'.
 			*/
-			$this->data['captcha'] = $this->flexi_auth->recaptcha(FALSE);
+			$this->data['captcha'] = $this->flexi_auth->recaptcha(TRUE);
 						
 			/**
 			 * flexi auths math CAPTCHA
@@ -136,7 +132,11 @@ class Auth extends CI_Controller {
 		// Get any status message that may have been set.
 		$this->data['message'] = (! isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];		
 
-		$this->load->view('demo/login_view', $this->data);
+//		echo '<pre>';
+//		printf($this->data['message']);
+//		echo '</pre>';
+//		exit();
+		$this->load->view('auth/login', $this->data);
     }
 
 	/**
