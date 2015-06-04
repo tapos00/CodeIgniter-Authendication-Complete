@@ -24,7 +24,6 @@
 					<div class="col-lg-10">
 						<textarea id="description" name="update_privilege_description" class="form-control" rows="3"
 								  title="A short description of the purpose of the privilege."><?php echo set_value('update_privilege_description', $privilege[$this->flexi_auth->db_column('user_privileges', 'description')]);?></textarea>
-
 					</div>
 				</div>
 
