@@ -108,14 +108,17 @@ class Demo_auth_model extends CI_Model {
 		// Set validation rules.
 		// The custom rules 'identity_available' and 'validate_password' can be found in '../libaries/MY_Form_validation.php'.
 		$validation_rules = array(
-			array('field' => 'register_first_name', 'label' => 'First Name', 'rules' => 'required'),
-			array('field' => 'register_last_name', 'label' => 'Last Name', 'rules' => 'required'),
-			array('field' => 'register_phone_number', 'label' => 'Phone Number', 'rules' => 'required'),
-			array('field' => 'register_newsletter', 'label' => 'Newsletter', 'rules' => 'integer'),
-			array('field' => 'register_email_address', 'label' => 'Email Address', 'rules' => 'required|valid_email|identity_available'),
-			array('field' => 'register_username', 'label' => 'Username', 'rules' => 'required|min_length[4]|identity_available'),
-			array('field' => 'register_password', 'label' => 'Password', 'rules' => 'required|validate_password'),
-			array('field' => 'register_confirm_password', 'label' => 'Confirm Password', 'rules' => 'required|matches[register_password]')
+			array('field' => 'fname', 'label' => 'First Name', 'rules' => 'required'),
+			array('field' => 'lname', 'label' => 'Last Name', 'rules' => 'required'),
+			array('field' => 'birthday', 'label' => 'Date Of Birth', 'rules' => 'required'),
+			array('field' => 'gender', 'label' => 'Gender', 'rules' => 'required'),
+			array('field' => 'blood', 'label' => 'Blood Group', 'rules' => 'required'),
+			array('field' => 'mobile', 'label' => 'Phone Number', 'rules' => 'required'),
+			array('field' => 'present_address', 'label' => 'Present Address', 'rules' => 'required'),
+			array('field' => 'email', 'label' => 'Email Address', 'rules' => 'required|valid_email|identity_available'),
+			array('field' => 'userName', 'label' => 'Username', 'rules' => 'required|min_length[4]|identity_available'),
+			array('field' => 'type', 'label' => 'Type of User', 'rules' => 'required'),
+			array('field' => 'password', 'label' => 'Password', 'rules' => 'required|validate_password')
 		);
 
 		$this->form_validation->set_rules($validation_rules);
@@ -124,22 +127,53 @@ class Demo_auth_model extends CI_Model {
 		if ($this->form_validation->run())
 		{
 			// Get user login details from input.
-			$email = $this->input->post('register_email_address');
-			$username = $this->input->post('register_username');
-			$password = $this->input->post('register_password');
-			
+			$email = $this->input->post('email');
+			$username = $this->input->post('userName');
+			$password = $this->input->post('password');
+			$profile_data = array(
+				'upro_first_name' => $this->input->post('fname'),
+				'upro_last_name' => $this->input->post('lname'),
+				'upro_phone' => $this->input->post('mobile'),
+				'present_address' => $this->input->post('present_address'),
+				'permanent_address' => $this->input->post('permanent_address'),
+				'gender' => $this->input->post('gender'),
+				'date_of_birth' => $this->input->post('birthday'),
+				'blood_group' => $this->input->post('blood'),
+				'occupation' => $this->input->post('occupation'),
+				'photo_avater' => '',
+				'photo' => ''
+			);
+			if (!file_exists($_FILES['userfile']['tmp_name']) || !is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+
+			} else {
+				if ($this->now_upload('userfile')) {
+					$profile_data['photo'] = $this->upload_data['file_name'];
+					$imageInfo = realpath(APPPATH . '../img/avator/');
+					$config['image_library'] = 'gd2';
+					$config['source_image'] = $this->upload_data['full_path'];
+					$config['new_image'] = $imageInfo;
+					$config['maintain_ratio'] = TRUE;
+					$config['width'] = 35;
+					$config['height'] = 35;
+
+					$this->load->library('image_lib', $config);
+
+					if (!$this->image_lib->resize()) {
+						$error = array('error' => $this->upload->display_errors());
+
+						$this->load->view('employee/edit/' . $this->uri->segment(3), $error);
+					} else {
+						$profile_data['photo_avater'] = $this->upload_data['file_name'];
+					}
+				}
+			}
 			// Get user profile data from input.
 			// You can add whatever columns you need to customise user tables.
-			$profile_data = array(
-				'upro_first_name' => $this->input->post('register_first_name'),
-				'upro_last_name' => $this->input->post('register_last_name'),
-				'upro_phone' => $this->input->post('register_phone_number'),
-				'upro_newsletter' => $this->input->post('register_newsletter')
-			);
+
 			
 			// Set whether to instantly activate account.
 			// This var will be used twice, once for registration, then to check if to log the user in after registration.
-			$instant_activate = FALSE;
+			$instant_activate = TRUE;
 	
 			// The last 2 variables on the register function are optional, these variables allow you to:
 			// #1. Specify the group ID for the user to be added to (i.e. 'Moderator' / 'Public'), the default is set via the config file.
@@ -163,11 +197,11 @@ class Demo_auth_model extends CI_Model {
 				
 				// This is an example of how to log the user into their account immeadiately after registering.
 				// This example would only be used if users do not have to authenticate their account via email upon registration.
-				if ($instant_activate && $this->flexi_auth->login($email, $password))
-				{
-					// Redirect user to public dashboard.
-					redirect('auth_public/dashboard');
-				}
+//				if ($instant_activate && $this->flexi_auth->login($email, $password))
+//				{
+//					// Redirect user to public dashboard.
+//					redirect('auth_public/dashboard');
+//				}
 				
 				// Redirect user to login page
 				redirect('auth');
@@ -178,6 +212,25 @@ class Demo_auth_model extends CI_Model {
 		$this->data['message'] = validation_errors('<p class="error_msg">', '</p>');
 
 		return FALSE;
+	}
+
+
+	private function now_upload($photo) {
+		$setConfig['upload_path'] = 'img/';
+		$setConfig['allowed_types'] = 'BMP|GIF|JPG|PNG|JPEG|gif|jpg|png|jpeg|bmp';
+		$setConfig['encrypt_name'] = TRUE;
+		$setConfig['max_size'] = '';
+		$setConfig['max_width'] = '';
+		$setConfig['max_height'] = '';
+		$this->load->library('upload');
+		$this->upload->initialize($setConfig);
+		if (!$this->upload->do_upload($photo)) {
+			$this->data['admin_message'] = $this->upload->display_errors("<p style='color:#FF0000; font-weight:bold;'>", "</p>");
+			return FALSE;
+		} else {
+			$this->upload_data = $this->upload->data();
+			return TRUE;
+		}
 	}
 	
 	###++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++###	
@@ -316,6 +369,19 @@ class Demo_auth_model extends CI_Model {
 			array('field' => 'update_email', 'label' => 'Email', 'rules' => 'required|valid_email|identity_available'),
 			array('field' => 'update_username', 'label' => 'Username', 'rules' => 'min_length[4]|identity_available')
 		);
+
+
+		$validation_rules = array(
+			array('field' => 'fname', 'label' => 'First Name', 'rules' => 'required'),
+			array('field' => 'lname', 'label' => 'Last Name', 'rules' => 'required'),
+			array('field' => 'birthday', 'label' => 'Date Of Birth', 'rules' => 'required'),
+			array('field' => 'gender', 'label' => 'Gender', 'rules' => 'required'),
+			array('field' => 'blood', 'label' => 'Blood Group', 'rules' => 'required'),
+			array('field' => 'mobile', 'label' => 'Phone Number', 'rules' => 'required'),
+			array('field' => 'present_address', 'label' => 'Present Address', 'rules' => 'required'),
+			array('field' => 'email', 'label' => 'Email Address', 'rules' => 'required|valid_email|identity_available'),
+			array('field' => 'userName', 'label' => 'Username', 'rules' => 'required|min_length[4]|identity_available')
+		);
 		
 		$this->form_validation->set_rules($validation_rules);
 		
@@ -334,13 +400,43 @@ class Demo_auth_model extends CI_Model {
 			// In this example, the primary key column and value is 'upro_uacc_fk' => $user_id.
 			$profile_data = array(
 				'upro_uacc_fk' => $user_id,
-				'upro_first_name' => $this->input->post('update_first_name'),
-				'upro_last_name' => $this->input->post('update_last_name'),
-				'upro_phone' => $this->input->post('update_phone_number'),
-				'upro_newsletter' => $this->input->post('update_newsletter'),
-				$this->flexi_auth->db_column('user_acc', 'email') => $this->input->post('update_email'),
-				$this->flexi_auth->db_column('user_acc', 'username') => $this->input->post('update_username')
+				'upro_first_name' => $this->input->post('fname'),
+				'upro_last_name' => $this->input->post('lname'),
+				'upro_phone' => $this->input->post('mobile'),
+				'gender' => $this->input->post('gender'),
+				'date_of_birth' => $this->input->post('birthday'),
+				'blood_group' => $this->input->post('blood'),
+				'occupation' => $this->input->post('occupation'),
+				'present_address' => $this->input->post('present_address'),
+				'permanent_address' => $this->input->post('permanent_address'),
+				$this->flexi_auth->db_column('user_acc', 'email') => $this->input->post('email'),
+				$this->flexi_auth->db_column('user_acc', 'username') => $this->input->post('userName')
 			);
+
+			if (!file_exists($_FILES['userfile']['tmp_name']) || !is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+
+			} else {
+				if ($this->now_upload('userfile')) {
+					$profile_data['photo'] = $this->upload_data['file_name'];
+					$imageInfo = realpath(APPPATH . '../img/avator/');
+					$config['image_library'] = 'gd2';
+					$config['source_image'] = $this->upload_data['full_path'];
+					$config['new_image'] = $imageInfo;
+					$config['maintain_ratio'] = TRUE;
+					$config['width'] = 35;
+					$config['height'] = 35;
+
+					$this->load->library('image_lib', $config);
+
+					if (!$this->image_lib->resize()) {
+						$error = array('error' => $this->upload->display_errors());
+
+						$this->load->view('employee/edit/' . $this->uri->segment(3), $error);
+					} else {
+						$profile_data['photo_avater'] = $this->upload_data['file_name'];
+					}
+				}
+			}
 			
 			// If we were only updating profile data (i.e. no email or username included), we could use the 'update_custom_user_data()' function instead.
 			$response = $this->flexi_auth->update_user($user_id, $profile_data);
@@ -349,7 +445,7 @@ class Demo_auth_model extends CI_Model {
 			$this->session->set_flashdata('message', $this->flexi_auth->get_messages());
 
 			// Redirect user.
-			($response) ? redirect('auth_public/dashboard') : redirect('auth_public/update_account');
+			($response) ? redirect('dashboard') : redirect('auth_public/update_account');
 		}
 		else
 		{		
@@ -359,6 +455,8 @@ class Demo_auth_model extends CI_Model {
 			return FALSE;
 		}
 	}
+
+
 
 	/**
 	 * change_password
@@ -394,7 +492,7 @@ class Demo_auth_model extends CI_Model {
 
 			// Redirect user.
 			// Note: As an added layer of security, you may wish to email the user that their password has been updated.
-			($response) ? redirect('auth_public/dashboard') : redirect('auth_public/change_password');
+			($response) ? redirect('auth') : redirect('auth');
 		}
 		else
 		{		

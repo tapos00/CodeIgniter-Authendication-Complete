@@ -32,8 +32,9 @@
     <!--[if lt IE 9]>
     <script src="<?php echo base_url(); ?>js/html5shiv.js"></script>
     <script src="<?php echo base_url(); ?>js/respond.min.js"></script>
-    <script src="<?php echo base_url(); ?>js/jquery.js"></script>
+
     <![endif]-->
+    <script src="<?php echo base_url(); ?>js/jquery-2.1.4.min.js"></script>
 </head>
 
 <body>
@@ -269,11 +270,11 @@
                 <li class="dropdown">
                     <a data-toggle="dropdown" class="dropdown-toggle" href="#">
                         <?php
-                        if (($this->flexi_auth->is_logged_in())) {
+                        if (!($this->flexi_auth->is_logged_in())) {
                             echo img(base_url() . 'img/noimage.png');
                         } else {
                             ?>
-                            <img height="29" width="29" src="<?php echo base_url(); ?>img/<?php echo $infoResult->Image ?>">
+                            <img height="29" width="29" src="<?php echo base_url(); ?>img/<?php echo $infoResult->photo_avater ?>">
                         <?php } ?>
                         <span class="username">
                             <?php
@@ -508,8 +509,7 @@
 </section>
 
 <!-- js placed at the end of the document so the pages load faster -->
-<script src="<?php echo base_url(); ?>js/jquery.js"></script>
-<script src="<?php echo base_url(); ?>js/jquery-1.8.3.min.js"></script>
+
 <script src="<?php echo base_url(); ?>js/bootstrap.min.js"></script>
 <script class="include" type="text/javascript" src="<?php echo base_url(); ?>js/jquery.dcjqaccordion.2.7.js"></script>
 <script src="<?php echo base_url(); ?>js/jquery.scrollTo.min.js"></script>

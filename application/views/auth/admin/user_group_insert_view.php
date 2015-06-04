@@ -14,38 +14,39 @@
 						</div>
 					<?php } ?>
 				</header>
-				<?php echo form_open(current_url());	?>
-				<fieldset>
-					<legend>Group Details</legend>
-					<ul>
-						<li class="info_req">
-							<label for="group">Group Name:</label>
-							<input type="text" id="group" name="insert_group_name" value="<?php echo set_value('insert_group_name');?>" class="tooltip_trigger"
-								   title="The name of the user group."/>
-						</li>
-						<li>
-							<label for="description">Group Description:</label>
-								<textarea id="description" name="insert_group_description" class="width_400 tooltip_trigger"
-										  title="A short description of the purpose of the user group."><?php echo set_value('insert_group_description');?></textarea>
-						</li>
-						<li>
-							<label for="admin">Is Admin Group:</label>
-							<input type="checkbox" id="admin" name="insert_group_admin" value="1" <?php echo set_checkbox('insert_group_admin',1);?> class="tooltip_trigger"
-								   title="If checked, the user group is set as an 'Admin' group."/>
-						</li>
-					</ul>
-				</fieldset>
-
-				<fieldset>
-					<legend>Insert New Group</legend>
-					<ul>
-						<li>
-							<label for="submit">Insert Group:</label>
-							<input type="submit" name="insert_user_group" id="submit" value="Submit" class="link_button large"/>
-						</li>
-					</ul>
-				</fieldset>
-				<?php echo form_close();?>
+				<div class="panel-body">
+					<?php echo form_open(current_url(),array('class' => 'form-horizontal', 'role' => 'form'));	?>
+						<div class="form-group">
+							<label for="group" class="col-lg-2 col-sm-2 control-label">Group Name:</label>
+							<div class="col-lg-10">
+								<input type="text" class="form-control" id="group" name="insert_group_name" value="<?php echo set_value('insert_group_name');?>" class="tooltip_trigger"
+									   title="The name of the user group.">
+							</div>
+						</div>
+						<div class="form-group">
+							<label for="description" class="col-lg-2 col-sm-2 control-label">Group Description:</label>
+							<div class="col-lg-10">
+								<textarea id="description" title="A short description of the purpose of the user group." name="insert_group_description" class="form-control" rows="3">
+									<?php echo set_value('insert_group_description');?>
+								</textarea>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-lg-offset-2 col-lg-10">
+								<div class="checkbox">
+									<label>
+										<input id="admin" name="insert_group_admin" value="1" <?php echo set_checkbox('insert_group_admin',1);?> type="checkbox"> Is Admin Group:
+									</label>
+								</div>
+							</div>
+						</div>
+						<div class="form-group">
+							<div class="col-lg-offset-2 col-lg-10">
+								<button type="submit" name="insert_user_group" id="submit" value="Submit" class="btn btn-danger">New Group</button>
+							</div>
+						</div>
+						<?php echo form_close();?>
+				</div>
 			</section>
 		</div>
 	</div>

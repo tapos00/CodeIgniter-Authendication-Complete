@@ -163,32 +163,34 @@ class Auth_admin extends CI_Controller {
  	 */
 	function update_user_account($user_id)
 	{
+
 		// Check user has privileges to update user accounts, else display a message to notify the user they do not have valid privileges.
-		if (! $this->flexi_auth->is_privileged('Update Users'))
-		{
+		if (!$this->flexi_auth->is_privileged('Update Users')) {
 			$this->session->set_flashdata('message', '<p class="error_msg">You do not have privileges to update user accounts.</p>');
-			redirect('auth_admin');		
+			redirect('auth_admin');
 		}
 
 		// If 'Update User Account' form has been submitted, update the users account details.
-		if ($this->input->post('update_users_account')) 
-		{
+		if ($this->input->post('update_users_account')) {
+
 			$this->load->model('demo_auth_admin_model');
 			$this->demo_auth_admin_model->update_user_account($user_id);
 		}
-		
+
 		// Get users current data.
 		$sql_where = array($this->flexi_auth->db_column('user_acc', 'id') => $user_id);
 		$this->data['user'] = $this->flexi_auth->get_users_row_array(FALSE, $sql_where);
-	
+
 		// Get user groups.
 		$this->data['groups'] = $this->flexi_auth->get_groups_array();
-		
-		// Set any returned status/error messages.
-		$this->data['message'] = (! isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];		
 
-		$this->load->view('demo/admin_examples/user_account_update_view', $this->data);
+		// Set any returned status/error messages.
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
+		$this->data['title'] = 'Update Profile';
+		$this->data['container'] = 'auth/admin/user_account_update_view';
+		$this->load->view('main_page', $this->data);
 	}
+
 
 	###++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++###	
 	// User Groups
@@ -287,11 +289,12 @@ class Auth_admin extends CI_Controller {
 		// Get user groups current data.
 		$sql_where = array($this->flexi_auth->db_column('user_group', 'id') => $group_id);
 		$this->data['group'] = $this->flexi_auth->get_groups_row_array(FALSE, $sql_where);
-		
+		$this->data['title'] = 'update user group information';
 		// Set any returned status/error messages.
-		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];		
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
+		$this->data['container'] = 'auth/admin/user_group_update_view';
+		$this->load->view('main_page', $this->data);
 
-		$this->load->view('demo/admin_examples/user_group_update_view', $this->data);
 	}
 
 	###++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++###	
@@ -393,9 +396,12 @@ class Auth_admin extends CI_Controller {
 		$this->data['privilege'] = $this->flexi_auth->get_privileges_row_array(FALSE, $sql_where);
 		
 		// Set any returned status/error messages.
-		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];		
+		$this->data['message'] = (!isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
 
-		$this->load->view('demo/admin_examples/privilege_update_view', $this->data);
+		$this->data['title'] = 'privilege_update_view';
+		$this->data['container'] = 'auth/admin/privilege_update_view';
+		$this->load->view('main_page', $this->data);
+
 	}
 	
  	/**
@@ -467,8 +473,10 @@ class Auth_admin extends CI_Controller {
         // For demo purposes of demonstrate whether the current defined user privilege source is getting privilege data from either individual user 
         // privileges or user group privileges, load the settings array containing the current privilege sources. 
 		$this->data['privilege_sources'] = $this->auth->auth_settings['privilege_sources'];
-                
-		$this->load->view('demo/admin_examples/user_privileges_update_view', $this->data);		
+
+		$this->data['title'] = 'user privileges update view';
+		$this->data['container'] = 'auth/admin/user_privileges_update_view';
+		$this->load->view('main_page', $this->data);
     }
     
     function update_group_privileges($group_id)
@@ -518,8 +526,12 @@ class Auth_admin extends CI_Controller {
         // For demo purposes of demonstrate whether the current defined user privilege source is getting privilege data from either individual user 
         // privileges or user group privileges, load the settings array containing the current privilege sources. 
         $this->data['privilege_sources'] = $this->auth->auth_settings['privilege_sources'];
-                
-		$this->load->view('demo/admin_examples/user_group_privileges_update_view', $this->data);		
+
+		$this->data['title'] = 'group update view';
+
+		$this->data['container'] = 'auth/admin/user_group_privileges_update_view';
+		$this->load->view('main_page', $this->data);
+
     }
 
 	###++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++###	
@@ -655,6 +667,32 @@ class Auth_admin extends CI_Controller {
 		$this->data['container'] = 'auth/admin/users_view';
 		$this->load->view('main_page', $this->data);
 	}
+
+	/**
+	 * register_account
+	 * User registration page used by all new users wishing to create an account.
+	 * Note: This page is only accessible to users who are not currently logged in, else they will be redirected.
+	 */
+	function register_account()
+	{
+		// Redirect user away from registration page if already logged in.
+
+		// If 'Registration' form has been submitted, attempt to register their details as a new account.
+		if ($this->input->post('register_user'))
+		{
+			$this->load->model('demo_auth_model');
+			$this->demo_auth_model->register_account();
+		}
+
+		// Get any status message that may have been set.
+		$this->data['title']= "new user insert";
+		$this->data['message'] = (! isset($this->data['message'])) ? $this->session->flashdata('message') : $this->data['message'];
+		$this->data['container'] = 'auth/admin/register';
+		$this->load->view('main_page', $this->data);
+
+	}
+
+
 
 }
 

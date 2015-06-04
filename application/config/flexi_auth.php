@@ -185,7 +185,7 @@
 	$config['database']['custom']['user_profile']['foreign_key'] = 'upro_uacc_fk';
 	$config['database']['custom']['user_profile']['join'] = 'demo_user_profiles.upro_uacc_fk';
 	$config['database']['custom']['user_profile']['custom_columns'] = array(
-		'upro_first_name','upro_last_name','upro_phone','photo_thurm','upro_newsletter','present_address','permanent_address','gender','date_of_birth','blood_group','occupation','photo_avater','default_visit_price','default_visit_duration'
+		'upro_first_name','upro_last_name','upro_phone','photo_thurm','upro_newsletter','present_address','permanent_address','gender','date_of_birth','blood_group','occupation','photo_avater','default_visit_price','default_visit_duration','photo'
 	);
 
 	###+++++++++++++++++++++++++++###
@@ -457,7 +457,7 @@
 	 * Set the minimum required characters for the users password.
 	 * @param int
 	*/
-	$config['security']['min_password_length'] = 8;
+	$config['security']['min_password_length'] = 4;
 	
 	/**
 	 * Set which characters are valid for user passwords.
@@ -512,7 +512,7 @@
 	 * Note: If a user exceeds 3 times the limit set, the resulting time ban is doubled to further slow down attempts.
  	 * Example: 0 = unlimited attempts, 3 = 3 attempts.
 	*/
-	$config['security']['login_attempt_limit'] = 3;
+	$config['security']['login_attempt_limit'] = 0;
 	
 	/**
 	 * If a user has exceeded the failed login attempt limit, set the length of time they must wait before they can attempt to login again.
@@ -526,7 +526,7 @@
 	 * 
 	 * Example: Time in seconds, 0 = no time ban, 10 = 10 seconds, 60*3 = 3 minutes.
 	*/
-	$config['security']['login_attempt_time_ban'] = 10;
+	$config['security']['login_attempt_time_ban'] = 0;
 
 	
 	###++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++###

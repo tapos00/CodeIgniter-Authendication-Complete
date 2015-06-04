@@ -153,34 +153,69 @@ class Demo_auth_admin_model extends CI_Model {
 
 		// Set validation rules.
 		$validation_rules = array(
-			array('field' => 'update_first_name', 'label' => 'First Name', 'rules' => 'required'),
-			array('field' => 'update_last_name', 'label' => 'Last Name', 'rules' => 'required'),
-			array('field' => 'update_phone_number', 'label' => 'Phone Number', 'rules' => 'required'),
-			array('field' => 'update_newsletter', 'label' => 'Newsletter', 'rules' => 'integer'),
-			array('field' => 'update_email_address', 'label' => 'Email Address', 'rules' => 'required|valid_email|identity_available['.$user_id.']'),
-			array('field' => 'update_username', 'label' => 'Username', 'rules' => 'min_length[4]|identity_available['.$user_id.']'),
-			array('field' => 'update_group', 'label' => 'User Group', 'rules' => 'required|integer')
+			array('field' => 'fname', 'label' => 'First Name', 'rules' => 'required'),
+			array('field' => 'lname', 'label' => 'Last Name', 'rules' => 'required'),
+			array('field' => 'birthday', 'label' => 'Date Of Birth', 'rules' => 'required'),
+			array('field' => 'gender', 'label' => 'Gender', 'rules' => 'required'),
+			array('field' => 'blood', 'label' => 'Blood Group', 'rules' => 'required'),
+			array('field' => 'mobile', 'label' => 'Phone Number', 'rules' => 'required'),
+			array('field' => 'present_address', 'label' => 'Present Address', 'rules' => 'required'),
+			array('field' => 'email', 'label' => 'Email Address', 'rules' => 'required|valid_email|identity_available['.$user_id.']'),
+			array('field' => 'userName', 'label' => 'Username', 'rules' => 'required|min_length[4]|identity_available['.$user_id.']'),
+			array('field' => 'type', 'label' => 'Type of User', 'rules' => 'required')
 		);
 
 		$this->form_validation->set_rules($validation_rules);
 		
 		if ($this->form_validation->run())
 		{
+
 			// 'Update User Account' form data is valid.
 			// IMPORTANT NOTE: As we are updating multiple tables (The main user account and user profile tables), it is very important to pass the
 			// primary key column and value in the $profile_data for any custom user tables being updated, otherwise, the function will not
 			// be able to identify the correct custom data row.
 			// In this example, the primary key column and value is 'upro_id' => $user_id.
 			$profile_data = array(
-				'upro_id' => $user_id,
-				'upro_first_name' => $this->input->post('update_first_name'),
-				'upro_last_name' => $this->input->post('update_last_name'),
-				'upro_phone' => $this->input->post('update_phone_number'),
-				'upro_newsletter' => $this->input->post('update_newsletter'),
-				$this->flexi_auth->db_column('user_acc', 'email') => $this->input->post('update_email_address'),
-				$this->flexi_auth->db_column('user_acc', 'username') => $this->input->post('update_username'),
-				$this->flexi_auth->db_column('user_acc', 'group_id') => $this->input->post('update_group')
-			);			
+				'upro_uacc_fk' => $user_id,
+				'upro_first_name' => $this->input->post('fname'),
+				'upro_last_name' => $this->input->post('lname'),
+				'upro_phone' => $this->input->post('mobile'),
+				'gender' => $this->input->post('gender'),
+				'date_of_birth' => $this->input->post('birthday'),
+				'blood_group' => $this->input->post('blood'),
+				'occupation' => $this->input->post('occupation'),
+				'present_address' => $this->input->post('present_address'),
+				'permanent_address' => $this->input->post('permanent_address'),
+				$this->flexi_auth->db_column('user_acc', 'email') => $this->input->post('email'),
+				$this->flexi_auth->db_column('user_acc', 'username') => $this->input->post('userName'),
+				$this->flexi_auth->db_column('user_acc', 'group_id') => $this->input->post('type')
+			);
+
+			if (!file_exists($_FILES['userfile']['tmp_name']) || !is_uploaded_file($_FILES['userfile']['tmp_name'])) {
+
+			} else {
+				if ($this->now_upload('userfile')) {
+					$profile_data['photo'] = $this->upload_data['file_name'];
+					$imageInfo = realpath(APPPATH . '../img/avator/');
+					$config['image_library'] = 'gd2';
+					$config['source_image'] = $this->upload_data['full_path'];
+					$config['new_image'] = $imageInfo;
+					$config['maintain_ratio'] = TRUE;
+					$config['width'] = 35;
+					$config['height'] = 35;
+
+					$this->load->library('image_lib', $config);
+
+					if (!$this->image_lib->resize()) {
+						$error = array('error' => $this->upload->display_errors());
+
+						$this->load->view('employee/edit/' . $this->uri->segment(3), $error);
+					} else {
+						$profile_data['photo_avater'] = $this->upload_data['file_name'];
+					}
+				}
+			}
+
 
 			// If we were only updating profile data (i.e. no email, username or group included), we could use the 'update_custom_user_data()' function instead.
 			$this->flexi_auth->update_user($user_id, $profile_data);
@@ -191,10 +226,27 @@ class Demo_auth_admin_model extends CI_Model {
 			// Redirect user.
 			redirect('auth_admin/manage_user_accounts');			
 		}
+
 		
 		return FALSE;
 	}
-
+	private function now_upload($photo) {
+		$setConfig['upload_path'] = 'img/';
+		$setConfig['allowed_types'] = 'BMP|GIF|JPG|PNG|JPEG|gif|jpg|png|jpeg|bmp';
+		$setConfig['encrypt_name'] = TRUE;
+		$setConfig['max_size'] = '';
+		$setConfig['max_width'] = '';
+		$setConfig['max_height'] = '';
+		$this->load->library('upload');
+		$this->upload->initialize($setConfig);
+		if (!$this->upload->do_upload($photo)) {
+			$this->data['admin_message'] = $this->upload->display_errors("<p style='color:#FF0000; font-weight:bold;'>", "</p>");
+			return FALSE;
+		} else {
+			$this->upload_data = $this->upload->data();
+			return TRUE;
+		}
+	}
  	/**
 	 * delete_users
 	 * Delete all user accounts that have not been activated X days since they were registered.
